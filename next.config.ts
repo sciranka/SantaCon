@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+const repo = process.env.GITHUB_REPO || ""
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: "export",
+  images: { unoptimized: true },
+  trailingSlash: true,
+  basePath: repo ? `/${repo}` : "",
+  // TODO: When using custom domain, remove basePath line above
+}
 
-export default nextConfig;
+export default nextConfig
