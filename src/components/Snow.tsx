@@ -1,26 +1,42 @@
 "use client"
 
-import type { Container } from "@tsparticles/engine"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
+
+const PARTICLE_COUNT = {
+  mobile: 30,
+  tablet: 60,
+  desktop: 100,
+} as const
+
+const getDeviceSize = (): keyof typeof PARTICLE_COUNT => {
+  if (typeof window === "undefined") return "desktop"
+
+  const width = window.innerWidth
+
+  if (width < 768) return "mobile"
+  if (width < 1024) return "tablet"
+  return "desktop"
+}
+
+const getParticleCount = (): number => {
+  const deviceSize = getDeviceSize()
+  return PARTICLE_COUNT[deviceSize]
+}
 
 export const Snow = (): React.JSX.Element => {
   useEffect(() => {
     initParticlesEngine(async (engine) => {
-      // Load the slim engine with basic particle functionality
       await loadSlim(engine)
     })
   }, [])
 
-  const particlesLoaded = async (container?: Container): Promise<void> => {
-    console.log("Snow particles loaded", container)
-  }
+  const particleCount = useMemo(() => getParticleCount(), [])
 
   return (
     <Particles
       id="snow"
-      particlesLoaded={particlesLoaded}
       options={{
         background: {
           color: {
@@ -29,19 +45,19 @@ export const Snow = (): React.JSX.Element => {
         },
         particles: {
           number: {
-            value: 100, // More snowflakes
+            value: particleCount,
           },
           color: {
-            value: "#ffffff", // White snow
+            value: "#ffffff",
           },
           shape: {
             type: "circle",
           },
           opacity: {
-            value: { min: 0.3, max: 0.7 }, // Varying opacity
+            value: { min: 0.2, max: 0.7 },
           },
           size: {
-            value: { min: 1, max: 4 }, // Different sizes
+            value: { min: 1, max: 4 },
           },
           move: {
             enable: true,
@@ -59,7 +75,9 @@ export const Snow = (): React.JSX.Element => {
           },
         },
         detectRetina: true,
-        fpsLimit: 60,
+        fpsLimit: 60, // Lower FPS for battery savings
+        pauseOnBlur: true, // Stop when tab not active
+        pauseOnOutsideViewport: true, // Stop when not visible
       }}
       className="absolute inset-0 pointer-events-none -z-10"
     />
